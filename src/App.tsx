@@ -8,6 +8,9 @@ import ValueFilter from './components/ValueFilter';
 import TableView from './components/TableView';
 import DateFilter from './components/DateFilter';
 
+// ВОТ ЭТО ИДЁТ ТУТ ↑ а не ниже
+import CovidChart from './components/CovidChart';
+
 const App: React.FC = () => {
   const [data, setData] = useState<CovidRecord[]>([]);
   const [countryFilter, setCountryFilter] = useState('');
@@ -25,46 +28,56 @@ const App: React.FC = () => {
     setMinValue('');
     setMaxValue('');
   };
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
+  const [dateFrom, setDateFrom] = useState<Date | null>(null);
+  const [dateTo, setDateTo] = useState<Date | null>(null);
 
   const handleResetDates = () => {
-  setDateFrom('');
-  setDateTo('');
-};
+    setDateFrom(null);
+    setDateTo(null);
+  };
+  
   return (
-    <Container className="mt-4">
-      <h2 className="mb-4">COVID-19 Statistika</h2>
+  <Container className="mt-4">
+    <h2 className="mb-4">COVID-19 Statistika</h2>
 
-      <CountryFilter country={countryFilter} onChange={setCountryFilter} />
-      <ValueFilter
-        field={valueField}
-        min={minValue}
-        max={maxValue}
-        onFieldChange={setValueField}
-        onMinChange={setMinValue}
-        onMaxChange={setMaxValue}
-      />
+    <CountryFilter country={countryFilter} onChange={setCountryFilter} />
+    <ValueFilter
+      field={valueField}
+      min={minValue}
+      max={maxValue}
+      onFieldChange={setValueField}
+      onMinChange={setMinValue}
+      onMaxChange={setMaxValue}
+    />
 
-      <DateFilter
-        from={minValue}
-        to={maxValue}
-        onFromChange={setMinValue}
-        onToChange={setMaxValue}
-        onReset={handleResetFilters}
-      />
+    <DateFilter
+      from={dateFrom}
+      to={dateTo}
+      onFromChange={setDateFrom}
+      onToChange={setDateTo}
+      onReset={handleResetDates}
+      data={data}
+    />
 
-      <TableView
-        data={data}
-        countryFilter={countryFilter}
-        valueField={valueField}
-        minValue={minValue === '' ? '' : Number(minValue)}
-        maxValue={maxValue === '' ? '' : Number(maxValue)}
-        onResetFilters={handleResetFilters}
-        dateFrom={dateFrom}
-        dateTo={dateTo}
-      />
-    </Container>
+    {/* ← ВОТ ЗДЕСЬ ДИАГРАММА */}
+    <CovidChart 
+      data={data} 
+      countryFilter={countryFilter} 
+      dateFrom={dateFrom ? dateFrom.toISOString().split('T')[0] : undefined}
+      dateTo={dateTo ? dateTo.toISOString().split('T')[0] : undefined}
+    />
+
+    <TableView
+      data={data}
+      countryFilter={countryFilter}
+      valueField={valueField}
+      minValue={minValue === '' ? '' : Number(minValue)}
+      maxValue={maxValue === '' ? '' : Number(maxValue)}
+      onResetFilters={handleResetFilters}
+      dateFrom={dateFrom ? dateFrom.toISOString().split('T')[0] : ''}
+      dateTo={dateTo ? dateTo.toISOString().split('T')[0] : ''}
+    />
+  </Container>
   );
 };
 

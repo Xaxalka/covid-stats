@@ -30,12 +30,27 @@ const TableView: React.FC<Props> = ({
   const [sortField, setSortField] = useState<'countriesAndTerritories' | 'cases' | 'deaths'>('countriesAndTerritories');
   const [sortAsc, setSortAsc] = useState(true);
 
+  // Calculate totals by country
+  const countryTotals = useMemo(() => {
+    const totals = new Map<string, { totalCases: number; totalDeaths: number }>();
+    
+    data.forEach(record => {
+      const country = record.countriesAndTerritories;
+      const current = totals.get(country) || { totalCases: 0, totalDeaths: 0 };
+      
+      totals.set(country, {
+        totalCases: current.totalCases + record.cases,
+        totalDeaths: current.totalDeaths + record.deaths
+      });
+    });
+    
+    return totals;
+  }, [data]);
+
   const filteredData = useMemo(() => {
     let filtered = [...data];
 
-
-
-if (dateFrom) {
+    if (dateFrom) {
   filtered = filtered.filter(record => {
     const recordDate = new Date(`${record.year}-${record.month}-${record.day}`);
     return recordDate >= new Date(dateFrom);
@@ -65,7 +80,7 @@ if (dateTo) {
     }
 
     return filtered;
-  }, [data, countryFilter, valueField, minValue, maxValue]);
+  }, [data, countryFilter, valueField, minValue, maxValue, dateFrom, dateTo]);
 
   const sortedData = useMemo(() => {
     return [...filteredData].sort((a, b) => {
@@ -100,7 +115,11 @@ if (dateTo) {
           type="text"
           placeholder="Поиск страны..."
           value={countryFilter}
-          onChange={(e) => setCurrentPage(1)}
+          onChange={(e) => {
+            setCurrentPage(1);
+            // Note: The actual filter value is managed by the parent component
+          }}
+          readOnly
         />
         <Button variant="secondary" onClick={onResetFilters}>
           Сбросить фильтры
@@ -121,6 +140,7 @@ if (dateTo) {
                 <th>Всего смертей</th>
                 <th>Случаи на 1000</th>
                 <th>Смерти на 1000</th>
+                <th>Дата</th>
               </tr>
             </thead>
             <tbody>
@@ -129,10 +149,11 @@ if (dateTo) {
                   <td>{record.countriesAndTerritories}</td>
                   <td>{record.cases}</td>
                   <td>{record.deaths}</td>
-                  <td>{/* вычисли общее */}</td>
-                  <td>{/* вычисли общее */}</td>
+                  <td>{countryTotals.get(record.countriesAndTerritories)?.totalCases || 0}</td>
+                  <td>{countryTotals.get(record.countriesAndTerritories)?.totalDeaths || 0}</td>
                   <td>{(record.cases / record.popData2019 * 1000).toFixed(2)}</td>
                   <td>{(record.deaths / record.popData2019 * 1000).toFixed(2)}</td>
+                  <td>{`${record.day}/${record.month}/${record.year}`}</td>
                 </tr>
               ))}
             </tbody>

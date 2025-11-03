@@ -26,8 +26,8 @@ const ChartView: React.FC<Props> = ({ data, country }) => {
           <YAxis />
           <Tooltip />
           <Legend />
-          <Line type="monotone" dataKey="cases" stroke="#8884d8" name="Случаи" />
-          <Line type="monotone" dataKey="deaths" stroke="#ff4d4f" name="Смерти" />
+          <Line type="monotone" dataKey="cases" stroke="#4285F4" strokeDasharray="5 5" name="Случаи" />
+          <Line type="monotone" dataKey="deaths" stroke="#EA4335" strokeDasharray="5 5" name="Смерти" />
         </LineChart>
       </ResponsiveContainer>
     </div>

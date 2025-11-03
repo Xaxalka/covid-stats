@@ -1,33 +1,92 @@
-import React from 'react';
-import { Form, Row, Col, Button } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Form, Row, Col, Button, Alert } from 'react-bootstrap';
+import { CovidRecord } from '../types/CovidData';
 
 interface Props {
-  from: string;
-  to: string;
-  onFromChange: (value: string) => void;
-  onToChange: (value: string) => void;
+  from: Date | null;
+  to: Date | null;
+  onFromChange: (value: Date | null) => void;
+  onToChange: (value: Date | null) => void;
   onReset: () => void;
+  data: CovidRecord[];
 }
 
-const DateFilter: React.FC<Props> = ({ from, to, onFromChange, onToChange, onReset }) => {
-  return (
+const DateFilter: React.FC<Props> = ({ from, to, onFromChange, onToChange, onReset, data }) => {
+  const [fromDateExists, setFromDateExists] = useState<boolean>(true);
+  const [toDateExists, setToDateExists] = useState<boolean>(true);
+
+  // Convert Date to YYYY-MM-DD string format for input
+  const formatDateForInput = (date: Date | null): string => {
+    if (!date) return '';
+    return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD
+  };
+
+  // Check if a date exists in the data
+  const dateExistsInData = (date: Date | null): boolean => {
+    if (!date || data.length === 0) return true;
     
+    const dateStr = date.toISOString().split('T')[0];
+    const [year, month, day] = dateStr.split('-').map(Number);
+    
+    return data.some(record => 
+      record.year === year && 
+      record.month === month && 
+      record.day === day
+    );
+  };
+
+  // Validate dates when they change or when data changes
+  useEffect(() => {
+    // Reset error states when dates change
+    if (from === null) setFromDateExists(true);
+    else setFromDateExists(dateExistsInData(from));
+    
+    if (to === null) setToDateExists(true);
+    else setToDateExists(dateExistsInData(to));
+  }, [from, to, data]);
+
+  // Handle date input changes
+  const handleFromChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const newDate = value ? new Date(value) : null;
+    onFromChange(newDate);
+  };
+
+  const handleToChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const newDate = value ? new Date(value) : null;
+    onToChange(newDate);
+  };
+
+  return (
     <Form.Group className="mb-3">
       <Form.Label>Период</Form.Label>
       <Row>
         <Col>
           <Form.Control
             type="date"
-            value={from}
-            onChange={(e) => onFromChange(e.target.value)}
+            value={formatDateForInput(from)}
+            onChange={handleFromChange}
+            isInvalid={!fromDateExists && from !== null}
           />
+          {!fromDateExists && from !== null && (
+            <Form.Control.Feedback type="invalid">
+              Данные за эту дату отсутствуют
+            </Form.Control.Feedback>
+          )}
         </Col>
         <Col>
           <Form.Control
             type="date"
-            value={to}
-            onChange={(e) => onToChange(e.target.value)}
+            value={formatDateForInput(to)}
+            onChange={handleToChange}
+            isInvalid={!toDateExists && to !== null}
           />
+          {!toDateExists && to !== null && (
+            <Form.Control.Feedback type="invalid">
+              Данные за эту дату отсутствуют
+            </Form.Control.Feedback>
+          )}
         </Col>
         <Col>
           <Button variant="secondary" onClick={onReset}>
@@ -35,6 +94,11 @@ const DateFilter: React.FC<Props> = ({ from, to, onFromChange, onToChange, onRes
           </Button>
         </Col>
       </Row>
+      {(!fromDateExists || !toDateExists) && (
+        <Alert variant="warning" className="mt-2">
+          Внимание: Выбранные даты отсутствуют в базе данных. Результаты могут быть неточными.
+        </Alert>
+      )}
     </Form.Group>
   );
 };
