@@ -48,8 +48,8 @@ You can learn more in the [Create React App documentation](https://facebook.gith
 
 To learn React, check out the [React documentation](https://reactjs.org/).
 
-### `If code doesnt starts try:`
+## If code doesnt starts try:
 
-## 'npm install recharts'
+## npm install recharts
 
 Maybe you dont install that component on your pc.
