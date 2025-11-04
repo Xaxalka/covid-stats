@@ -62,25 +62,17 @@ const App: React.FC = () => {
     />
 
     {/* Tab interface for switching between chart and table views */}
-    <Tab.Container id="covid-views" activeKey={activeTab} onSelect={(k) => setActiveTab(k || 'chart')}>
+    <Tab.Container id="covid-views" activeKey={activeTab} onSelect={(k) => setActiveTab(k || 'table')}>
       <Nav variant="tabs" className="mb-3 mt-3">
-        <Nav.Item>
-          <Nav.Link eventKey="chart">График</Nav.Link>
-        </Nav.Item>
+        
         <Nav.Item>
           <Nav.Link eventKey="table">Таблица</Nav.Link>
         </Nav.Item>
+        <Nav.Item>
+          <Nav.Link eventKey="chart">График</Nav.Link>
+        </Nav.Item>
       </Nav>
-      <Tab.Content>
-        <Tab.Pane eventKey="chart">
-          <CovidChart 
-            data={data} 
-            countryFilter={countryFilter} 
-            dateFrom={dateFrom ? dateFrom.toISOString().split('T')[0] : undefined}
-            dateTo={dateTo ? dateTo.toISOString().split('T')[0] : undefined}
-          />
-        </Tab.Pane>
-        <Tab.Pane eventKey="table">
+       <Tab.Pane eventKey="table">
           <TableView
             data={data}
             countryFilter={countryFilter}
@@ -92,6 +84,16 @@ const App: React.FC = () => {
             dateTo={dateTo ? dateTo.toISOString().split('T')[0] : ''}
           />
         </Tab.Pane>
+      <Tab.Content>
+        <Tab.Pane eventKey="chart">
+          <CovidChart 
+            data={data} 
+            countryFilter={countryFilter} 
+            dateFrom={dateFrom ? dateFrom.toISOString().split('T')[0] : undefined}
+            dateTo={dateTo ? dateTo.toISOString().split('T')[0] : undefined}
+          />
+        </Tab.Pane>
+       
       </Tab.Content>
     </Tab.Container>
   </Container>
