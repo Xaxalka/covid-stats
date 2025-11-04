@@ -9,9 +9,10 @@ interface Props {
   onToChange: (value: Date | null) => void;
   onReset: () => void;
   data: CovidRecord[];
+  countryFilter?: string;
 }
 
-const DateFilter: React.FC<Props> = ({ from, to, onFromChange, onToChange, onReset, data }) => {
+const DateFilter: React.FC<Props> = ({ from, to, onFromChange, onToChange, onReset, data, countryFilter }) => {
   const [fromDateExists, setFromDateExists] = useState<boolean>(true);
   const [toDateExists, setToDateExists] = useState<boolean>(true);
 
@@ -21,14 +22,22 @@ const DateFilter: React.FC<Props> = ({ from, to, onFromChange, onToChange, onRes
     return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD
   };
 
-  // Check if a date exists in the data
+  // Check if a date exists in the data for the selected country
   const dateExistsInData = (date: Date | null): boolean => {
     if (!date || data.length === 0) return true;
     
     const dateStr = date.toISOString().split('T')[0];
     const [year, month, day] = dateStr.split('-').map(Number);
     
-    return data.some(record => 
+    // Filter data by country if a country filter is applied
+    const filteredData = countryFilter && countryFilter !== ''
+      ? data.filter(record => record.countriesAndTerritories === countryFilter)
+      : data;
+    
+    // If no data exists after country filtering, consider all dates valid
+    if (filteredData.length === 0) return true;
+    
+    return filteredData.some(record => 
       record.year === year && 
       record.month === month && 
       record.day === day
@@ -43,7 +52,7 @@ const DateFilter: React.FC<Props> = ({ from, to, onFromChange, onToChange, onRes
     
     if (to === null) setToDateExists(true);
     else setToDateExists(dateExistsInData(to));
-  }, [from, to, data]);
+  }, [from, to, data, countryFilter]);
 
   // Handle date input changes
   const handleFromChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,11 +78,6 @@ const DateFilter: React.FC<Props> = ({ from, to, onFromChange, onToChange, onRes
             onChange={handleFromChange}
             isInvalid={!fromDateExists && from !== null}
           />
-          {!fromDateExists && from !== null && (
-            <Form.Control.Feedback type="invalid">
-              Данные за эту дату отсутствуют
-            </Form.Control.Feedback>
-          )}
         </Col>
         <Col>
           <Form.Control
@@ -82,11 +86,6 @@ const DateFilter: React.FC<Props> = ({ from, to, onFromChange, onToChange, onRes
             onChange={handleToChange}
             isInvalid={!toDateExists && to !== null}
           />
-          {!toDateExists && to !== null && (
-            <Form.Control.Feedback type="invalid">
-              Данные за эту дату отсутствуют
-            </Form.Control.Feedback>
-          )}
         </Col>
         <Col>
           <Button variant="secondary" onClick={onReset}>
@@ -96,7 +95,7 @@ const DateFilter: React.FC<Props> = ({ from, to, onFromChange, onToChange, onRes
       </Row>
       {(!fromDateExists || !toDateExists) && (
         <Alert variant="warning" className="mt-2">
-          Внимание: Выбранные даты отсутствуют в базе данных. Результаты могут быть неточными.
+          Внимание: Результаты могут быть неточными. Так как данные стран отличаются по наличию информации за определённые даты.
         </Alert>
       )}
     </Form.Group>

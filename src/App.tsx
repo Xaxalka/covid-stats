@@ -57,6 +57,7 @@ const App: React.FC = () => {
       onToChange={setDateTo}
       onReset={handleResetDates}
       data={data}
+      countryFilter={countryFilter}
     />
 
     {/* ← ВОТ ЗДЕСЬ ДИАГРАММА */}
