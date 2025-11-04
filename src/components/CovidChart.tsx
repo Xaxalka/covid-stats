@@ -24,12 +24,13 @@ interface Props {
 export default function CovidChart({ data, countryFilter, dateFrom, dateTo, onCountryFilterChange }: Props) {
   // Extract unique countries from the data
   const countries = Array.from(new Set(data.map(d => d.countriesAndTerritories))).sort();
+  
   // Filter data by country and date range
   let filteredData = countryFilter 
     ? data.filter(d => 
         d.countriesAndTerritories.toLowerCase().includes(countryFilter.toLowerCase())
       )
-    : data.slice(0, 10); // Show top 10 countries if no filter is applied
+    : data; // Use all data when no country filter is applied
   
   // Apply date filters if provided
   if (dateFrom) {
@@ -45,17 +46,49 @@ export default function CovidChart({ data, countryFilter, dateFrom, dateTo, onCo
     });
   }
   
-  // Sort data by date in chronological order (from earlier to later)
-  filteredData.sort((a, b) => {
-    const dateA = new Date(`${a.year}-${a.month}-${a.day}`);
-    const dateB = new Date(`${b.year}-${b.month}-${b.day}`);
-    return dateA.getTime() - dateB.getTime();
-  });
+  // If "Все страны" is selected (empty countryFilter), aggregate data by date
+  let labels: string[];
+  let cases: number[];
+  let deaths: number[];
   
-  // Create labels with country and date information
-  const labels = filteredData.map(d => `${d.countriesAndTerritories} (${d.day}/${d.month}/${d.year})`);
-  const cases = filteredData.map(d => d.cases);
-  const deaths = filteredData.map(d => d.deaths);
+  if (!countryFilter || countryFilter === '') {
+    // Aggregate data by date for all countries
+    const dateMap = new Map<string, { cases: number; deaths: number; date: Date }>();
+    
+    filteredData.forEach(record => {
+      const dateKey = `${record.year}-${record.month}-${record.day}`;
+      const existing = dateMap.get(dateKey) || { cases: 0, deaths: 0, date: new Date(`${record.year}-${record.month}-${record.day}`) };
+      
+      dateMap.set(dateKey, {
+        cases: existing.cases + record.cases,
+        deaths: existing.deaths + record.deaths,
+        date: existing.date
+      });
+    });
+    
+    // Sort by date and create arrays
+    const sortedEntries = Array.from(dateMap.entries()).sort((a, b) => 
+      a[1].date.getTime() - b[1].date.getTime()
+    );
+    
+    labels = sortedEntries.map(([dateKey, value]) => {
+      const date = value.date;
+      return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+    });
+    cases = sortedEntries.map(([, value]) => value.cases);
+    deaths = sortedEntries.map(([, value]) => value.deaths);
+  } else {
+    // For specific country, show individual records
+    filteredData.sort((a, b) => {
+      const dateA = new Date(`${a.year}-${a.month}-${a.day}`);
+      const dateB = new Date(`${b.year}-${b.month}-${b.day}`);
+      return dateA.getTime() - dateB.getTime();
+    });
+    
+    labels = filteredData.map(d => `${d.countriesAndTerritories} (${d.day}/${d.month}/${d.year})`);
+    cases = filteredData.map(d => d.cases);
+    deaths = filteredData.map(d => d.deaths);
+  }
 
   const chartData = {
     labels: labels,
@@ -94,6 +127,9 @@ export default function CovidChart({ data, countryFilter, dateFrom, dateTo, onCo
     },
   };
 
+  // Check if there's no data after filtering
+  const hasNoData = labels.length === 0 || (cases.length === 0 && deaths.length === 0);
+
   return (
     <div style={{ marginTop: "40px" }}>
       <h4>График по странам</h4>
@@ -104,7 +140,11 @@ export default function CovidChart({ data, countryFilter, dateFrom, dateTo, onCo
           onChange={onCountryFilterChange}
         />
       </div>
-      <Line data={chartData} options={options} />
+      {hasNoData ? (
+        <p className="text-center text-muted mt-4">Ничего не найдено</p>
+      ) : (
+        <Line data={chartData} options={options} />
+      )}
     </div>
   );
 }

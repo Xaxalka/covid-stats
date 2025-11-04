@@ -54,17 +54,101 @@ const DateFilter: React.FC<Props> = ({ from, to, onFromChange, onToChange, onRes
     else setToDateExists(dateExistsInData(to));
   }, [from, to, data, countryFilter]);
 
-  // Handle date input changes
+  // Handle date input changes with validation
   const handleFromChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const newDate = value ? new Date(value) : null;
+    
+    // Validate range if 'to' date is set
+    if (newDate && to) {
+      // Check minimum range (1 month)
+      const minDate = new Date(newDate);
+      minDate.setMonth(minDate.getMonth() + 1);
+      if (to < minDate) {
+        // Adjust 'to' date if it's less than 1 month from 'from'
+        const adjustedTo = new Date(minDate);
+        onToChange(adjustedTo);
+      }
+      
+      // Check maximum range (1 year)
+      const maxDate = new Date(newDate);
+      maxDate.setFullYear(maxDate.getFullYear() + 1);
+      if (to > maxDate) {
+        // Adjust 'to' date if it exceeds 1 year from 'from'
+        const adjustedTo = new Date(maxDate);
+        onToChange(adjustedTo);
+      }
+    }
+    
     onFromChange(newDate);
   };
 
   const handleToChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     const newDate = value ? new Date(value) : null;
+    
+    // Validate range if 'from' date is set
+    if (newDate && from) {
+      // Check minimum range (1 month)
+      const minDate = new Date(from);
+      minDate.setMonth(minDate.getMonth() + 1);
+      if (newDate < minDate) {
+        // Don't allow 'to' date to be less than 1 month from 'from'
+        onToChange(minDate);
+        return;
+      }
+      
+      // Check maximum range (1 year)
+      const maxDate = new Date(from);
+      maxDate.setFullYear(maxDate.getFullYear() + 1);
+      if (newDate > maxDate) {
+        // Limit 'to' date to 1 year from 'from'
+        onToChange(maxDate);
+        return;
+      }
+    }
+    
     onToChange(newDate);
+  };
+
+  // Calculate max date for 'to' input (1 year from 'from')
+  const getMaxToDate = (): string | undefined => {
+    if (from) {
+      const maxDate = new Date(from);
+      maxDate.setFullYear(maxDate.getFullYear() + 1);
+      return formatDateForInput(maxDate);
+    }
+    return undefined;
+  };
+
+  // Calculate min date for 'from' input (1 year before 'to')
+  const getMinFromDate = (): string | undefined => {
+    if (to) {
+      const minDate = new Date(to);
+      minDate.setFullYear(minDate.getFullYear() - 1);
+      return formatDateForInput(minDate);
+    }
+    return undefined;
+  };
+
+  // Calculate min date for 'to' input (1 month from 'from')
+  const getMinToDate = (): string | undefined => {
+    if (from) {
+      const minDate = new Date(from);
+      minDate.setMonth(minDate.getMonth() + 1);
+      return formatDateForInput(minDate);
+    }
+    return undefined;
+  };
+
+  // Calculate max date for 'from' input (1 month before 'to')
+  const getMaxFromDate = (): string | undefined => {
+    if (to) {
+      const maxDate = new Date(to);
+      maxDate.setMonth(maxDate.getMonth() - 1);
+      return formatDateForInput(maxDate);
+    }
+    return undefined;
   };
 
   return (
@@ -76,6 +160,8 @@ const DateFilter: React.FC<Props> = ({ from, to, onFromChange, onToChange, onRes
             type="date"
             value={formatDateForInput(from)}
             onChange={handleFromChange}
+            max={getMaxFromDate()}
+            min={getMinFromDate()}
             size="sm"
           />
         </Col>
@@ -84,11 +170,13 @@ const DateFilter: React.FC<Props> = ({ from, to, onFromChange, onToChange, onRes
             type="date"
             value={formatDateForInput(to)}
             onChange={handleToChange}
+            min={getMinToDate()}
+            max={getMaxToDate()}
             size="sm"
           />
         </Col>
         <Col xs={12} sm={4} md={6}>
-          <Button variant="secondary" onClick={onReset} size="sm">
+          <Button variant="secondary" onClick={onReset} size="sm" className="w-100">
             Показать весь период
           </Button>
         </Col>
@@ -96,6 +184,8 @@ const DateFilter: React.FC<Props> = ({ from, to, onFromChange, onToChange, onRes
       {(!fromDateExists || !toDateExists) && (
         <Alert variant="warning" className="mt-2">
           Внимание: Результаты могут быть неточными. Так как данные стран отличаются по наличию информации за определённые даты.
+          <br />
+          (Так же присутствует лимит: минимальный диапазон 1 месяц, максимальный диапазон 1 год)
         </Alert>
       )}
     </Form.Group>

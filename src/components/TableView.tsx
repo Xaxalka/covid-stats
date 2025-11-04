@@ -202,7 +202,7 @@ const TableView: React.FC<Props> = ({
       </div>
 
       {pagedData.length === 0 ? (
-        <p>Пo вашему критерию ничего не найдено</p>
+        <p className="text-center text-muted mt-4">Ничего не найдено</p>
       ) : (
         <>
           <Table striped bordered hover responsive>
