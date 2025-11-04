@@ -1,35 +1,47 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Table, Form, Button, Pagination } from 'react-bootstrap';
 import { CovidRecord } from '../types/CovidData';
+import ValueFilter from './ValueFilter';
 
 interface Props {
   data: CovidRecord[];
   dateFrom: string;
   dateTo: string;
-  countryFilter: string;
-  valueField: string;
-  minValue: number | '';
-  maxValue: number | '';
   onResetFilters: () => void;
-  
+  onCountryFilterChange?: (value: string) => void;
 }
 
 const PAGE_SIZE = 20;
 
 const TableView: React.FC<Props> = ({
   data,
-  countryFilter,
-  valueField,
-  minValue,
-  maxValue,
   onResetFilters,
   dateFrom,
   dateTo,
+  onCountryFilterChange,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortField, setSortField] = useState<'countriesAndTerritories' | 'cases' | 'deaths'| 'popData2019'|'dateRep'>('countriesAndTerritories');
   const [sortAsc, setSortAsc] = useState(true);
-
+  const [valueField, setValueField] = useState('');
+  const [minValue, setMinValue] = useState('');
+  const [maxValue, setMaxValue] = useState('');
+  const [countryFilter, setCountryFilter] = useState('');
+  
+  const handleResetValueFilters = () => {
+    setValueField('');
+    setMinValue('');
+    setMaxValue('');
+    setCountryFilter('');
+  };
+  
+  // Notify parent component when countryFilter changes
+  useEffect(() => {
+    if (onCountryFilterChange) {
+      onCountryFilterChange(countryFilter);
+    }
+  }, [countryFilter, onCountryFilterChange]);
+  
   // Calculate totals by country
   const countryTotals = useMemo(() => {
     const totals = new Map<string, { totalCases: number; totalDeaths: number }>();
@@ -51,18 +63,18 @@ const TableView: React.FC<Props> = ({
     let filtered = [...data];
 
     if (dateFrom) {
-  filtered = filtered.filter(record => {
-    const recordDate = new Date(`${record.year}-${record.month}-${record.day}`);
-    return recordDate >= new Date(dateFrom);
-  });
-}
+      filtered = filtered.filter(record => {
+        const recordDate = new Date(`${record.year}-${record.month}-${record.day}`);
+        return recordDate >= new Date(dateFrom);
+      });
+    }
 
-if (dateTo) {
-  filtered = filtered.filter(record => {
-    const recordDate = new Date(`${record.year}-${record.month}-${record.day}`);
-    return recordDate <= new Date(dateTo);
-  });
-}
+    if (dateTo) {
+      filtered = filtered.filter(record => {
+        const recordDate = new Date(`${record.year}-${record.month}-${record.day}`);
+        return recordDate <= new Date(dateTo);
+      });
+    }
 
     if (countryFilter) {
       filtered = filtered.filter(record =>
@@ -73,8 +85,8 @@ if (dateTo) {
     if (valueField && (minValue !== '' || maxValue !== '')) {
       filtered = filtered.filter(record => {
         const value = record[valueField as keyof CovidRecord] as number;
-        const minOk = minValue === '' || value >= minValue;
-        const maxOk = maxValue === '' || value <= maxValue;
+        const minOk = minValue === '' || value >= Number(minValue);
+        const maxOk = maxValue === '' || value <= Number(maxValue);
         return minOk && maxOk;
       });
     }
@@ -117,12 +129,22 @@ if (dateTo) {
           value={countryFilter}
           onChange={(e) => {
             setCurrentPage(1);
-            // Note: The actual filter value is managed by the parent component
+            setCountryFilter(e.target.value);
           }}
-          readOnly
         />
-        <Button variant="secondary" onClick={onResetFilters}>
-          Сбросить фильтры
+        <ValueFilter
+          field={valueField}
+          min={minValue}
+          max={maxValue}
+          onFieldChange={setValueField}
+          onMinChange={setMinValue}
+          onMaxChange={setMaxValue}
+        />
+        <Button variant="secondary" onClick={() => {
+          onResetFilters();
+          handleResetValueFilters();
+        }} className="ms-3">
+          Сбросить все фильтры
         </Button>
       </div>
 
