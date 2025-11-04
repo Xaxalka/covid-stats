@@ -27,7 +27,7 @@ const TableView: React.FC<Props> = ({
   dateTo,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortField, setSortField] = useState<'countriesAndTerritories' | 'cases' | 'deaths'>('countriesAndTerritories');
+  const [sortField, setSortField] = useState<'countriesAndTerritories' | 'cases' | 'deaths'| 'popData2019'|'dateRep'>('countriesAndTerritories');
   const [sortAsc, setSortAsc] = useState(true);
 
   // Calculate totals by country
@@ -140,7 +140,7 @@ if (dateTo) {
                 <th>Всего смертей</th>
                 <th>Случаи на 1000</th>
                 <th>Смерти на 1000</th>
-                <th>Дата</th>
+                <th onClick={() => handleSort('dateRep')}>Дата</th>
               </tr>
             </thead>
             <tbody>
