@@ -69,6 +69,7 @@ const App: React.FC = () => {
           <CovidChart 
             data={data} 
             countryFilter={countryFilter} 
+            onCountryFilterChange={setCountryFilter}
             dateFrom={dateFrom ? dateFrom.toISOString().split('T')[0] : undefined}
             dateTo={dateTo ? dateTo.toISOString().split('T')[0] : undefined}
           />

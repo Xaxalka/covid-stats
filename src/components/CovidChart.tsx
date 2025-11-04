@@ -9,6 +9,7 @@ import {
   Tooltip,
 } from "chart.js";
 import { CovidRecord } from "../types/CovidData";
+import CountryFilter from "./CountryFilter";
 
 Chart.register(LineElement, PointElement, CategoryScale, LinearScale, Legend, Tooltip);
 
@@ -17,9 +18,12 @@ interface Props {
   countryFilter: string;
   dateFrom?: string;
   dateTo?: string;
+  onCountryFilterChange: (country: string) => void;
 }
 
-export default function CovidChart({ data, countryFilter, dateFrom, dateTo }: Props) {
+export default function CovidChart({ data, countryFilter, dateFrom, dateTo, onCountryFilterChange }: Props) {
+  // Extract unique countries from the data
+  const countries = Array.from(new Set(data.map(d => d.countriesAndTerritories))).sort();
   // Filter data by country and date range
   let filteredData = countryFilter 
     ? data.filter(d => 
@@ -34,7 +38,6 @@ export default function CovidChart({ data, countryFilter, dateFrom, dateTo }: Pr
       return recordDate >= new Date(dateFrom);
     });
   }
-
   if (dateTo) {
     filteredData = filteredData.filter(record => {
       const recordDate = new Date(`${record.year}-${record.month}-${record.day}`);
@@ -94,12 +97,14 @@ export default function CovidChart({ data, countryFilter, dateFrom, dateTo }: Pr
   return (
     <div style={{ marginTop: "40px" }}>
       <h4>График по странам</h4>
+      <div className="mb-3">
+        <CountryFilter
+          country={countryFilter}
+          countries={countries}
+          onChange={onCountryFilterChange}
+        />
+      </div>
       <Line data={chartData} options={options} />
-      {!countryFilter && (
-        <p style={{ marginTop: "10px", color: "#666" }}>
-          Для более точных данных, пожалуйста, введите название страны в фильтр
-        </p>
-      )}
     </div>
   );
 }
