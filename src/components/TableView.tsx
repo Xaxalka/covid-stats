@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Table, Form, Button, Pagination } from 'react-bootstrap';
+import { Table, Form, Button, Pagination, Row, Col } from 'react-bootstrap';
 import { CovidRecord } from '../types/CovidData';
 import ValueFilter from './ValueFilter';
 
@@ -21,7 +21,7 @@ const TableView: React.FC<Props> = ({
   onCountryFilterChange,
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortField, setSortField] = useState<'countriesAndTerritories' | 'cases' | 'deaths'| 'popData2019'|'dateRep'>('countriesAndTerritories');
+  const [sortField, setSortField] = useState<'countriesAndTerritories' | 'cases' | 'deaths'| 'popData2019'|'dateRep'|'totalCases'|'totalDeaths'|'casesPer1000'|'deathsPer1000'>('countriesAndTerritories');
   const [sortAsc, setSortAsc] = useState(true);
   const [valueField, setValueField] = useState('');
   const [minValue, setMinValue] = useState('');
@@ -96,13 +96,31 @@ const TableView: React.FC<Props> = ({
 
   const sortedData = useMemo(() => {
     return [...filteredData].sort((a, b) => {
-      const aVal = a[sortField];
-      const bVal = b[sortField];
+      let aVal: any;
+      let bVal: any;
+      
+      if (sortField === 'totalCases') {
+        aVal = countryTotals.get(a.countriesAndTerritories)?.totalCases || 0;
+        bVal = countryTotals.get(b.countriesAndTerritories)?.totalCases || 0;
+      } else if (sortField === 'totalDeaths') {
+        aVal = countryTotals.get(a.countriesAndTerritories)?.totalDeaths || 0;
+        bVal = countryTotals.get(b.countriesAndTerritories)?.totalDeaths || 0;
+      } else if (sortField === 'casesPer1000') {
+        aVal = a.popData2019 > 0 ? (a.cases / a.popData2019 * 1000) : 0;
+        bVal = b.popData2019 > 0 ? (b.cases / b.popData2019 * 1000) : 0;
+      } else if (sortField === 'deathsPer1000') {
+        aVal = a.popData2019 > 0 ? (a.deaths / a.popData2019 * 1000) : 0;
+        bVal = b.popData2019 > 0 ? (b.deaths / b.popData2019 * 1000) : 0;
+      } else {
+        aVal = a[sortField];
+        bVal = b[sortField];
+      }
+      
       if (aVal < bVal) return sortAsc ? -1 : 1;
       if (aVal > bVal) return sortAsc ? 1 : -1;
       return 0;
     });
-  }, [filteredData, sortField, sortAsc]);
+  }, [filteredData, sortField, sortAsc, countryTotals]);
 
   const pagedData = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
@@ -120,32 +138,67 @@ const TableView: React.FC<Props> = ({
     }
   };
 
+  const SortIcon: React.FC<{ field: typeof sortField }> = ({ field }) => { //Иконка сортировки стрелочкой вверх и вниз.
+    const isActive = sortField === field;
+    return (
+      <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        width="16" 
+        height="16" 
+        fill="currentColor" 
+        className="bi bi-arrow-down-up ms-1" 
+        viewBox="0 0 16 16"
+        style={{ opacity: isActive ? 1 : 0.5 }}
+      >
+        <path 
+          fillRule="evenodd" 
+          d="M11.5 15a.5.5 0 0 0 .5-.5V2.707l3.146 3.147a.5.5 0 0 0 .708-.708l-4-4a.5.5 0 0 0-.708 0l-4 4a.5.5 0 1 0 .708.708L11 2.707V14.5a.5.5 0 0 0 .5.5m-7-14a.5.5 0 0 1 .5.5v11.793l3.146-3.147a.5.5 0 0 1 .708.708l-4 4a.5.5 0 0 1-.708 0l-4-4a.5.5 0 0 1 .708-.708L4 13.293V1.5a.5.5 0 0 1 .5-.5"
+        />
+      </svg>
+    );
+  };
+
   return (
     <>
-      <div className="d-flex justify-content-between align-items-center mb-3">
-        <Form.Control
-          type="text"
-          placeholder="Поиск страны..."
-          value={countryFilter}
-          onChange={(e) => {
-            setCurrentPage(1);
-            setCountryFilter(e.target.value);
-          }}
-        />
-        <ValueFilter
-          field={valueField}
-          min={minValue}
-          max={maxValue}
-          onFieldChange={setValueField}
-          onMinChange={setMinValue}
-          onMaxChange={setMaxValue}
-        />
-        <Button variant="secondary" onClick={() => {
-          onResetFilters();
-          handleResetValueFilters();
-        }} className="ms-3">
-          Сбросить все фильтры
-        </Button>
+      <div className="mb-3">
+        <Row className="align-items-end g-3">
+          <Col md={3}>
+            <Form.Group>
+              <Form.Label>Поиск страны</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Введите название..."
+                value={countryFilter}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  setCurrentPage(1);
+                  setCountryFilter(e.target.value);
+                }}
+              />
+            </Form.Group>
+          </Col>
+          <Col md={6}>
+            <ValueFilter
+              field={valueField}
+              min={minValue}
+              max={maxValue}
+              onFieldChange={setValueField}
+              onMinChange={setMinValue}
+              onMaxChange={setMaxValue}
+            />
+          </Col>
+          <Col md={3}>
+            <Button 
+              variant="secondary" 
+              onClick={() => {
+                onResetFilters();
+                handleResetValueFilters();
+              }}
+              className="w-100"
+            >
+              Сбросить все фильтры
+            </Button>
+          </Col>
+        </Row>
       </div>
 
       {pagedData.length === 0 ? (
@@ -155,14 +208,30 @@ const TableView: React.FC<Props> = ({
           <Table striped bordered hover responsive>
             <thead>
               <tr>
-                <th onClick={() => handleSort('countriesAndTerritories')}>Страна</th>
-                <th onClick={() => handleSort('cases')}>Случаи</th>
-                <th onClick={() => handleSort('deaths')}>Смерти</th>
-                <th>Всего случаев</th>
-                <th>Всего смертей</th>
-                <th>Случаи на 1000</th>
-                <th>Смерти на 1000</th>
-                <th onClick={() => handleSort('dateRep')}>Дата</th>
+                <th onClick={() => handleSort('countriesAndTerritories')} style={{ cursor: 'pointer' }}>
+                  Страна <SortIcon field="countriesAndTerritories" />
+                </th>
+                <th onClick={() => handleSort('cases')} style={{ cursor: 'pointer' }}>
+                  Случаи <SortIcon field="cases" />
+                </th>
+                <th onClick={() => handleSort('deaths')} style={{ cursor: 'pointer' }}>
+                  Смерти <SortIcon field="deaths" />
+                </th>
+                <th onClick={() => handleSort('totalCases')} style={{ cursor: 'pointer' }}>
+                  Всего случаев <SortIcon field="totalCases" />
+                </th>
+                <th onClick={() => handleSort('totalDeaths')} style={{ cursor: 'pointer' }}>
+                  Всего смертей <SortIcon field="totalDeaths" />
+                </th>
+                <th onClick={() => handleSort('casesPer1000')} style={{ cursor: 'pointer' }}>
+                  Случаи на 1000 <SortIcon field="casesPer1000" />
+                </th>
+                <th onClick={() => handleSort('deathsPer1000')} style={{ cursor: 'pointer' }}>
+                  Смерти на 1000 <SortIcon field="deathsPer1000" />
+                </th>
+                <th onClick={() => handleSort('dateRep')} style={{ cursor: 'pointer' }}>
+                  Дата <SortIcon field="dateRep" />
+                </th>
               </tr>
             </thead>
             <tbody>

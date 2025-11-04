@@ -46,7 +46,7 @@ const App: React.FC = () => {
     />
 
     {/* Tab interface for switching between chart and table views */}
-    <Tab.Container id="covid-views" activeKey={activeTab} onSelect={(k) => setActiveTab(k || 'table')}>
+    <Tab.Container id="covid-views" activeKey={activeTab} onSelect={(k: string | null) => setActiveTab(k || 'table')}>
       <Nav variant="tabs" className="mb-3 mt-3">
         <Nav.Item>
           <Nav.Link eventKey="table">Таблица</Nav.Link>

@@ -70,25 +70,27 @@ const DateFilter: React.FC<Props> = ({ from, to, onFromChange, onToChange, onRes
   return (
     <Form.Group className="mb-3">
       <Form.Label>Период</Form.Label>
-      <Row>
-        <Col>
+      <Row className="g-2">
+        <Col xs={12} sm={4} md={3}>
           <Form.Control
             type="date"
             value={formatDateForInput(from)}
             onChange={handleFromChange}
             isInvalid={!fromDateExists && from !== null}
+            size="sm"
           />
         </Col>
-        <Col>
+        <Col xs={12} sm={4} md={3}>
           <Form.Control
             type="date"
             value={formatDateForInput(to)}
             onChange={handleToChange}
             isInvalid={!toDateExists && to !== null}
+            size="sm"
           />
         </Col>
-        <Col>
-          <Button variant="secondary" onClick={onReset}>
+        <Col xs={12} sm={4} md={6}>
+          <Button variant="secondary" onClick={onReset} size="sm">
             Показать весь период
           </Button>
         </Col>
