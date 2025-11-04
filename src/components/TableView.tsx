@@ -181,17 +181,86 @@ const TableView: React.FC<Props> = ({
             </tbody>
           </Table>
 
-          <Pagination>
-            {[...Array(totalPages)].map((_, i) => (
-              <Pagination.Item
-                key={i}
-                active={i + 1 === currentPage}
-                onClick={() => setCurrentPage(i + 1)}
-              >
-                {i + 1}
-              </Pagination.Item>
-            ))}
-          </Pagination>
+          <div className="d-flex justify-content-center mt-3">
+            <Pagination>
+              <Pagination.First 
+                onClick={() => setCurrentPage(1)} 
+                disabled={currentPage === 1}
+              />
+              <Pagination.Prev 
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+              />
+              
+              {/* Logic for displaying pages */}
+              {(() => {
+                const pages = [];
+                const maxVisiblePages = 5; // Maximum number of visible page buttons
+                
+                // Always show first page
+                if (currentPage > 3) {
+                  pages.push(
+                    <Pagination.Item 
+                      key={1} 
+                      onClick={() => setCurrentPage(1)}
+                    >
+                      1
+                    </Pagination.Item>
+                  );
+                  
+                  // Show ellipsis if there are pages between first and current - 1
+                  if (currentPage > 4) {
+                    pages.push(<Pagination.Ellipsis key="ellipsis1" disabled />);
+                  }
+                }
+                
+                // Calculate range of visible page buttons
+                const startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+                const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+                
+                // Generate visible page buttons
+                for (let i = startPage; i <= endPage; i++) {
+                  pages.push(
+                    <Pagination.Item
+                      key={i}
+                      active={i === currentPage}
+                      onClick={() => setCurrentPage(i)}
+                    >
+                      {i}
+                    </Pagination.Item>
+                  );
+                }
+                
+                // Show ellipsis if there are more pages after the visible range
+                if (endPage < totalPages - 1) {
+                  pages.push(<Pagination.Ellipsis key="ellipsis2" disabled />);
+                }
+                
+                // Always show last page if it's not in the visible range
+                if (endPage < totalPages) {
+                  pages.push(
+                    <Pagination.Item
+                      key={totalPages}
+                      onClick={() => setCurrentPage(totalPages)}
+                    >
+                      {totalPages}
+                    </Pagination.Item>
+                  );
+                }
+                
+                return pages;
+              })()}
+              
+              <Pagination.Next
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+              />
+              <Pagination.Last
+                onClick={() => setCurrentPage(totalPages)}
+                disabled={currentPage === totalPages}
+              />
+            </Pagination>
+          </div>
         </>
       )}
     </>
