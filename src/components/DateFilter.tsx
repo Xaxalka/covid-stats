@@ -76,7 +76,6 @@ const DateFilter: React.FC<Props> = ({ from, to, onFromChange, onToChange, onRes
             type="date"
             value={formatDateForInput(from)}
             onChange={handleFromChange}
-            isInvalid={!fromDateExists && from !== null}
             size="sm"
           />
         </Col>
@@ -85,7 +84,6 @@ const DateFilter: React.FC<Props> = ({ from, to, onFromChange, onToChange, onRes
             type="date"
             value={formatDateForInput(to)}
             onChange={handleToChange}
-            isInvalid={!toDateExists && to !== null}
             size="sm"
           />
         </Col>
