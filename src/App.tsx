@@ -2,7 +2,7 @@
 // Theme is persisted in localStorage and applied by adding/removing 'theme-dark' on <body>.
 import React, { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Button, Container, Nav, Tab } from 'react-bootstrap';
+import { Button, Container, Nav, Tab, Spinner } from 'react-bootstrap';
 import { CovidRecord } from './types/CovidData';
 import { fetchCovidData } from './utils/fetchData';
 import TableView from './components/TableView';
@@ -13,14 +13,28 @@ import CovidChart from './components/CovidChart';
 
 const App: React.FC = () => {
   const [data, setData] = useState<CovidRecord[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
   const [countryFilter, setCountryFilter] = useState('');
   const [activeTab, setActiveTab] = useState('table');
   const [theme, setTheme] = useState<'light' | 'dark'>(
     () => (localStorage.getItem('theme') as 'light' | 'dark') || 'light'
   );
+  const [showBackToTop, setShowBackToTop] = useState(false);
 
   useEffect(() => {
-    fetchCovidData().then(setData).catch(console.error);
+    setLoading(true);
+    fetchCovidData()
+      .then(setData)
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setShowBackToTop(window.scrollY > 300);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   useEffect(() => {
@@ -54,7 +68,7 @@ const App: React.FC = () => {
         size="sm"
         className="ms-3"
       >
-        {theme === 'dark' ? 'Светлая тема' : 'Тёмная тема'}
+        {theme === 'dark' ? '☀️ Светлая тема' : '🌙 Тёмная тема'}
       </Button>
     </div>
 
@@ -68,6 +82,15 @@ const App: React.FC = () => {
       data={data}
       countryFilter={countryFilter}
     />
+
+    {/* Loading indicator while fetching data */}
+    {loading && (
+      <div className="d-flex justify-content-center my-3">
+        <Spinner animation="border" role="status" variant={theme === 'dark' ? 'light' : 'secondary'}>
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      </div>
+    )}
 
     {/* Tab interface for switching between chart and table views */}
     <Tab.Container id="covid-views" activeKey={activeTab} onSelect={(k: string | null) => setActiveTab(k || 'table')}>
@@ -100,6 +123,31 @@ const App: React.FC = () => {
         </Tab.Pane>
       </Tab.Content>
     </Tab.Container>
+
+    {showBackToTop && (
+      <Button
+        variant={theme === 'dark' ? 'light' : 'secondary'}
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        style={{
+          position: 'fixed',
+          bottom: '1rem',
+          right: '1rem',
+          width: '42px',
+          height: '42px',
+          borderRadius: '50%',
+          padding: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '1.1rem',
+          boxShadow: '0 6px 16px rgba(0,0,0,0.2)'
+        }}
+        aria-label="Прокрутить вверх"
+        title="Вверх"
+      >
+        ↑
+      </Button>
+    )}
   </Container>
   );
 };
