@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Container, Nav, Tab } from 'react-bootstrap';
+import { Button, Container, Nav, Tab } from 'react-bootstrap';
 import { CovidRecord } from './types/CovidData';
 import { fetchCovidData } from './utils/fetchData';
 import TableView from './components/TableView';
@@ -13,10 +13,22 @@ const App: React.FC = () => {
   const [data, setData] = useState<CovidRecord[]>([]);
   const [countryFilter, setCountryFilter] = useState('');
   const [activeTab, setActiveTab] = useState('table');
+  const [theme, setTheme] = useState<'light' | 'dark'>(
+    () => (localStorage.getItem('theme') as 'light' | 'dark') || 'light'
+  );
 
   useEffect(() => {
     fetchCovidData().then(setData).catch(console.error);
   }, []);
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.body.classList.add('theme-dark');
+    } else {
+      document.body.classList.remove('theme-dark');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
 
   const handleResetFilters = () => {
     setCountryFilter('');
@@ -32,7 +44,17 @@ const App: React.FC = () => {
   
   return (
   <Container className="mt-4">
-    <h2 className="mb-4">COVID-19 Statistika</h2>
+    <div className="d-flex align-items-center mb-4">
+      <h2 className="m-0">COVID-19 Statistika</h2>
+      <Button
+        variant={theme === 'dark' ? 'light' : 'dark'}
+        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+        size="sm"
+        className="ms-3"
+      >
+        {theme === 'dark' ? 'Светлая тема' : 'Тёмная тема'}
+      </Button>
+    </div>
 
     
     <DateFilter

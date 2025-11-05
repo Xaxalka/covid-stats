@@ -11,3 +11,88 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* Dark theme */
+body.theme-dark {
+  background-color: #121212;
+  color: #e5e5e5;
+}
+
+body.theme-dark .card,
+body.theme-dark .list-group-item {
+  background-color: #1e1e1e;
+  color: #e5e5e5;
+  border-color: #333;
+}
+
+body.theme-dark .nav-tabs {
+  border-color: #3a3a3a;
+}
+body.theme-dark .nav-tabs .nav-link {
+  color: #bbbbbb;
+  border-color: transparent;
+}
+body.theme-dark .nav-tabs .nav-link.active {
+  color: #ffffff;
+  background-color: #1e1e1e;
+  border-color: #3a3a3a #3a3a3a #1e1e1e;
+}
+
+body.theme-dark .form-control,
+body.theme-dark .form-select {
+  background-color: #1e1e1e;
+  color: #e5e5e5;
+  border-color: #3a3a3a;
+}
+
+body.theme-dark .table {
+  color: #e5e5e5;
+  /* Override Bootstrap table CSS variables for dark theme */
+  --bs-table-color: #e5e5e5;
+  --bs-table-bg: #1a1a1a;
+  --bs-table-border-color: #2a2a2a;
+  --bs-table-striped-bg: #181818;
+  --bs-table-striped-color: #e5e5e5;
+  --bs-table-hover-bg: #222222;
+  --bs-table-hover-color: #ffffff;
+}
+body.theme-dark .table thead th {
+  background-color: #161616;
+  border-color: #3a3a3a;
+}
+body.theme-dark .table td,
+body.theme-dark .table th {
+  border-color: #2a2a2a;
+}
+body.theme-dark .table-striped > tbody > tr:nth-of-type(odd) > * {
+  --bs-table-accent-bg: #181818;
+  color: #dddddd;
+}
+body.theme-dark .table-hover > tbody > tr:hover > * {
+  --bs-table-accent-bg: #222222;
+  color: #ffffff;
+}
+
+/* Pagination in dark */
+body.theme-dark .pagination .page-link {
+  background-color: #1e1e1e;
+  color: #dddddd;
+  border-color: #333;
+}
+body.theme-dark .pagination .page-item.active .page-link {
+  background-color: #2a2a2a;
+  border-color: #555;
+  color: #ffffff;
+}
+body.theme-dark .pagination .page-link:hover {
+  background-color: #262626;
+  color: #ffffff;
+}
+
+/* Narrow widths for period controls */
+.period-controls input[type="date"] {
+  width: 160px;
+}
+.period-controls .btn {
+  width: auto;
+}

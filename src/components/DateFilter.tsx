@@ -152,10 +152,10 @@ const DateFilter: React.FC<Props> = ({ from, to, onFromChange, onToChange, onRes
   };
 
   return (
-    <Form.Group className="mb-3">
+    <Form.Group className="mb-3 period-controls">
       <Form.Label>Период</Form.Label>
-      <Row className="g-2">
-        <Col xs={12} sm={4} md={3}>
+      <Row className="g-2 align-items-stretch">
+        <Col xs={12} sm="auto" md="auto">
           <Form.Control
             type="date"
             value={formatDateForInput(from)}
@@ -165,7 +165,7 @@ const DateFilter: React.FC<Props> = ({ from, to, onFromChange, onToChange, onRes
             size="sm"
           />
         </Col>
-        <Col xs={12} sm={4} md={3}>
+        <Col xs={12} sm="auto" md="auto">
           <Form.Control
             type="date"
             value={formatDateForInput(to)}
@@ -175,8 +175,8 @@ const DateFilter: React.FC<Props> = ({ from, to, onFromChange, onToChange, onRes
             size="sm"
           />
         </Col>
-        <Col xs={12} sm={4} md={6}>
-          <Button variant="secondary" onClick={onReset} size="sm" className="w-100">
+        <Col xs={12} sm="auto" md="auto">
+          <Button variant="secondary" onClick={onReset} size="sm" className="py-1" style={{ whiteSpace: 'nowrap' }}>
             Показать весь период
           </Button>
         </Col>
