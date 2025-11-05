@@ -107,6 +107,7 @@ body.theme-dark .pagination .page-link:hover {
 /* Sticky table header and scrollable table area */
 .table-responsive {
   max-height: 65vh;
+  overflow: auto;
 }
 .table-responsive thead th {
   position: sticky;
@@ -114,6 +115,29 @@ body.theme-dark .pagination .page-link:hover {
   z-index: 2;
   background: #ffffff;
   box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+/* Hide scrollbars when not hovering the table area */
+.table-responsive:not(:hover) {
+  scrollbar-width: none; /* Firefox */
+}
+.table-responsive:not(:hover)::-webkit-scrollbar {
+  width: 0px; /* Chrome/Safari/Edge */
+  height: 0px;
+}
+.table-responsive:hover {
+  scrollbar-width: thin; /* Firefox */
+}
+.table-responsive:hover::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.table-responsive:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,0.3);
+  border-radius: 8px;
+}
+body.theme-dark .table-responsive:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(255,255,255,0.3);
 }
 
 /* Subtle hover transition */
