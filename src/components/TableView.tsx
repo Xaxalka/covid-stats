@@ -1,3 +1,8 @@
+// TableView: displays filtered, sorted and paginated covid data
+// - Derives totals per country (cases/deaths)
+// - Supports text search by country and numeric range filter by chosen field
+// - Sorting supports raw fields and derived metrics (per 1000, totals)
+// - Pagination is client-side with compact controls
 import React, { useState, useMemo, useEffect } from 'react';
 import { Table, Form, Button, Pagination, Row, Col } from 'react-bootstrap';
 import { CovidRecord } from '../types/CovidData';

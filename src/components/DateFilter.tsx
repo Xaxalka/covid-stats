@@ -1,3 +1,7 @@
+// DateFilter: selects a period with simple constraints and data-awareness
+// - Enforces min range = 1 month and max range = 1 year
+// - Validates that selected dates exist in the (optionally country-filtered) dataset
+// - Exposes helper min/max for inputs based on the other bound
 import React, { useState, useEffect } from 'react';
 import { Form, Row, Col, Button, Alert } from 'react-bootstrap';
 import { CovidRecord } from '../types/CovidData';
@@ -15,6 +19,7 @@ interface Props {
 const DateFilter: React.FC<Props> = ({ from, to, onFromChange, onToChange, onReset, data, countryFilter }) => {
   const [fromDateExists, setFromDateExists] = useState<boolean>(true);
   const [toDateExists, setToDateExists] = useState<boolean>(true);
+  const [showPeriodAlert, setShowPeriodAlert] = useState<boolean>(true); // allows hiding the alert until reload
 
   // Convert Date to YYYY-MM-DD string format for input
   const formatDateForInput = (date: Date | null): string => {
@@ -181,11 +186,19 @@ const DateFilter: React.FC<Props> = ({ from, to, onFromChange, onToChange, onRes
           </Button>
         </Col>
       </Row>
-      {(!fromDateExists || !toDateExists) && (
-        <Alert variant="warning" className="mt-2">
+      {showPeriodAlert && (!fromDateExists || !toDateExists) && (
+        <Alert variant="warning" className="mt-2 d-flex align-items-center justify-content-between">
           Внимание: Результаты могут быть неточными. Так как данные стран отличаются по наличию информации за определённые даты.
           <br />
           (Так же присутствует лимит: минимальный диапазон 1 месяц, максимальный диапазон 1 год)
+          <Button 
+            variant="outline-warning" 
+            size="sm" 
+            className="ms-3"
+            onClick={() => setShowPeriodAlert(false)}
+          >
+            Скрыть
+          </Button>
         </Alert>
       )}
     </Form.Group>

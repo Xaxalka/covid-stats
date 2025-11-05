@@ -12,6 +12,10 @@ code {
     monospace;
 }
 
+/* Global styles and Dark theme overrides
+   - Dark theme is activated by adding 'theme-dark' to <body>
+   - Overrides focus on Bootstrap variables selectively (tables, forms, nav-tabs)
+*/
 /* Dark theme */
 body.theme-dark {
   background-color: #121212;
@@ -89,7 +93,7 @@ body.theme-dark .pagination .page-link:hover {
   color: #ffffff;
 }
 
-/* Narrow widths for period controls */
+/* Narrow widths for period controls (date inputs + reset button) */
 .period-controls input[type="date"] {
   width: 160px;
 }

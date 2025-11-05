@@ -1,3 +1,5 @@
+// App: root component. Loads data, manages filters, tab navigation and theme toggle
+// Theme is persisted in localStorage and applied by adding/removing 'theme-dark' on <body>.
 import React, { useEffect, useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Button, Container, Nav, Tab } from 'react-bootstrap';
