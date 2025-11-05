@@ -50,6 +50,22 @@ body.theme-dark .form-select {
   color: #e5e5e5;
   border-color: #3a3a3a;
 }
+body.theme-dark .form-control::placeholder {
+  color: #bdbdbd;
+  opacity: 1;
+}
+body.theme-dark .form-label {
+  color: #e5e5e5;
+}
+body.theme-dark .form-select option {
+  background-color: #1e1e1e;
+  color: #e5e5e5;
+}
+body.theme-dark .form-control:focus,
+body.theme-dark .form-select:focus {
+  border-color: #6c757d;
+  box-shadow: 0 0 0 0.2rem rgba(108,117,125,0.25);
+}
 
 body.theme-dark .table {
   color: #e5e5e5;
